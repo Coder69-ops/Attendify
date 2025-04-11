@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Status bar padding to avoid overlapping with system UI -->
+    <dimen name="status_bar_padding">24dp</dimen>
+    
+    <!-- Standard dimensions -->
+    <dimen name="activity_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
+</resources> 

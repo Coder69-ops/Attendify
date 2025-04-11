@@ -1,0 +1,235 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Rate limiting function
+    function hasNotExceededRateLimit() {
+      let requestsPath = /databases/$(database)/documents/users/$(request.auth.uid)/requests;
+      let recentRequests = getAfter(requestsPath).data.count;
+      let lastReset = getAfter(requestsPath).data.lastReset;
+      let now = request.time;
+      
+      return recentRequests < 100 || now.toMillis() - lastReset.toMillis() > 3600000;
+    }
+
+    // Reset rate limit if time window has passed
+    function resetRateLimit() {
+      let requestsPath = /databases/$(database)/documents/users/$(request.auth.uid)/requests;
+      let lastReset = getAfter(requestsPath).data.lastReset;
+      let now = request.time;
+      
+      if (now.toMillis() - lastReset.toMillis() > 3600000) {
+        return true;
+      }
+      return false;
+    }
+
+    // Data validation functions
+    function isValidEmail(email) {
+      return email.matches('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$');
+    }
+
+    function isValidDate(date) {
+      return date is timestamp || (date is string && date.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+    }
+
+    function isValidAttendanceStatus(status) {
+      return status in ['OnTime', 'Late', 'Missed'];
+    }
+
+    function isValidLocationStatus(status) {
+      return status in ['InOffice', 'OutOfOffice', 'Unknown'];
+    }
+
+    function isValidCheckInTime(time) {
+      return time <= request.time && 
+             time.toMillis() >= request.time.toMillis() - duration.value(24, 'h');
+    }
+
+    function isWithinWorkingHours(time) {
+      let hour = time.toDate().getHours();
+      return hour >= 7 && hour <= 19;
+    }
+
+    function hasNoDuplicateCheckIn(userId, date) {
+      return !exists(/databases/$(database)/documents/attendance/$(userId)/$(date));
+    }
+
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if the user is accessing their own data
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to check if the user has admin role
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if the user is a manager
+    function isManager() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isManager == true);
+    }
+    
+    // Helper function to check if the user is a department manager
+    function isDepartmentManager(departmentId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/departments/$(departmentId)) &&
+        get(/databases/$(database)/documents/departments/$(departmentId)).data.managerId == request.auth.uid;
+    }
+    
+    // Helper function to check if the user is a team leader
+    function isTeamLeader(teamId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/teams/$(teamId)) &&
+        get(/databases/$(database)/documents/teams/$(teamId)).data.leaderId == request.auth.uid;
+    }
+    
+    // Helper function to check if the user is a member of a team
+    function isTeamMember(teamId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/teams/$(teamId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.memberIds;
+    }
+    
+    // Users collection rules    match /users/{userId} {
+      // Anyone can create a user document (during registration)
+      // Only the user themselves or an admin can read or update their document
+      // Only admins can delete user documents
+      allow create: if isAuthenticated() && 
+                   request.auth.uid == userId && 
+                   hasNotExceededRateLimit() &&
+                   isValidEmail(request.resource.data.email) &&
+                   request.resource.data.keys().hasAll(['email', 'fullName', 'role']);
+      
+      allow read: if (isUser(userId) || isAdmin() || 
+                    (isManager() && 
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == resource.data.officeId));
+      
+      allow update: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin']) || isAdmin());
+      
+      allow delete: if isAdmin() && hasNotExceededRateLimit();
+    }
+    
+    // Attendance collection rules    match /attendance/{userId}/{date}/{docId} {
+      // Users can read, create, and update their own attendance records
+      // Admins can read, create, update, and delete any attendance records
+      // Managers can read attendance records for users in their office
+      allow read: if (isUser(userId) || isAdmin() || 
+                  (isAuthenticated() && 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == 
+                   resource.data.officeId)) &&
+                   hasNotExceededRateLimit();
+                   
+      allow create: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   isValidDate(request.resource.data.date) &&
+                   request.resource.data.keys().hasAll(['userId', 'date', 'checkInTime', 'status', 'officeId', 'locationStatus']) &&
+                   isValidAttendanceStatus(request.resource.data.status) &&
+                   isValidLocationStatus(request.resource.data.locationStatus) &&
+                   isValidCheckInTime(request.resource.data.checkInTime) &&
+                   isWithinWorkingHours(request.resource.data.checkInTime) &&
+                   hasNoDuplicateCheckIn(userId, date);
+                   
+      allow update: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   request.resource.data.diff(resource.data).affectedKeys()
+                     .hasAny(['checkOutTime', 'status', 'notes', 'locationStatus']) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['locationStatus']) || 
+                     isValidLocationStatus(request.resource.data.locationStatus)) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) || 
+                     isValidAttendanceStatus(request.resource.data.status)) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['checkOutTime']) || 
+                     request.resource.data.checkOutTime > resource.data.checkInTime);
+      
+      allow delete: if isAdmin() && hasNotExceededRateLimit();
+    }
+    
+    // Allow admins to query attendance records by date across users for an office
+    match /{path=**}/{date}/{docId} {
+      allow read: if isAdmin() && 
+                  path.size() == 1 && 
+                  path[0] == 'attendance' && 
+                  resource.data.officeId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId;
+    }
+    
+    // Office collection rules
+    match /offices/{officeId} {
+      // Only admins can create, update, and delete offices
+      // All authenticated users can read office data
+      allow create: if isAdmin();
+      allow read: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Department collection rules    match /departments/{departmentId} {
+      // Only admins can create, update, and delete departments
+      // All authenticated users can read department data within their office
+      // Department managers can update their department
+      allow create: if isAdmin() && 
+                   hasNotExceededRateLimit() &&
+                   request.resource.data.keys().hasAll(['name', 'officeId', 'managerId']) &&
+                   exists(/databases/$(database)/documents/offices/$(request.resource.data.officeId));
+      
+      allow read: if isAuthenticated() && 
+                  (isAdmin() || 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == resource.data.officeId);
+      
+      allow update: if (isAdmin() || isDepartmentManager(departmentId)) && 
+                   hasNotExceededRateLimit() &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['officeId']) || isAdmin());
+      
+      allow delete: if isAdmin() && 
+                   hasNotExceededRateLimit() &&
+                   !exists(/databases/$(database)/documents/teams) ||
+                   !exists(/databases/$(database)/documents/users);
+    
+    // Team collection rules    match /teams/{teamId} {
+      // Only admins and department managers can create teams
+      // Team members and admins can read team data
+      // Team leaders and admins can update team data
+      // Only admins can delete teams
+      allow create: if (isAdmin() || 
+                    (isAuthenticated() && 
+                     request.resource.data.departmentId != null &&
+                     isDepartmentManager(request.resource.data.departmentId))) &&
+                   hasNotExceededRateLimit() &&
+                   request.resource.data.keys().hasAll(['name', 'departmentId', 'leaderId']) &&
+                   exists(/databases/$(database)/documents/departments/$(request.resource.data.departmentId));
+      
+      allow read: if isAuthenticated() && 
+                  (isAdmin() || 
+                   isManager() || 
+                   isTeamMember(teamId) || 
+                   isTeamLeader(teamId) ||
+                   isDepartmentManager(get(/databases/$(database)/documents/teams/$(teamId)).data.departmentId)) &&
+                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == 
+                  get(/databases/$(database)/documents/departments/$(resource.data.departmentId)).data.officeId;
+      
+      allow update: if (isAdmin() || isTeamLeader(teamId)) && 
+                   hasNotExceededRateLimit() &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['departmentId']) || isAdmin());
+      
+      allow delete: if isAdmin() && 
+                   hasNotExceededRateLimit() &&
+                   !exists(/databases/$(database)/documents/users);
+    }
+    
+    // Pending Approvals collection rules
+    match /pendingApprovals/{approvalId} {
+      // Only admins and managers can access pending approvals
+      allow read, write: if isAdmin() || isManager();
+    }
+  }
+}

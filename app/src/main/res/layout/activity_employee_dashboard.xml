@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+            <!-- Spacer for status bar -->
+            <View
+                android:id="@+id/statusBarSpacer"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/status_bar_padding"
+                app:layout_constraintTop_toTopOf="parent" />
+            
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:background="?attr/colorSurface"
+                android:elevation="0dp"
+                app:titleTextColor="?attr/colorOnSurface"
+                app:titleCentered="true"
+                app:titleTextAppearance="@style/TextAppearance.Attendify.Headline3"
+                app:title="Employee Dashboard"
+                app:layout_constraintTop_toBottomOf="@id/statusBarSpacer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+                
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/toolbarDivider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                app:dividerColor="?attr/colorOutline"
+                android:alpha="0.2"
+                app:layout_constraintTop_toBottomOf="@id/toolbar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+                
+            <!-- Subtle shadow -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@drawable/toolbar_shadow"
+                app:layout_constraintTop_toBottomOf="@id/toolbarDivider" />
+                
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/homeScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Welcome Section -->
+            <TextView
+                android:id="@+id/welcomeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Welcome, [Name]"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/dateText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Today, [Date]"
+                android:textAppearance="?attr/textAppearanceBody1"
+                app:layout_constraintTop_toBottomOf="@id/welcomeText" />
+
+            <!-- Status Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/statusCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/dateText">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/statusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Current Status"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <!-- Add network status indicator -->
+                    <TextView
+                        android:id="@+id/networkStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Online"
+                        android:textSize="12sp"
+                        android:textColor="@color/status_on_time"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                        
+                    <ImageView
+                        android:id="@+id/networkStatusIndicator"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="4dp"
+                        android:src="@drawable/ic_network_connected"
+                        app:tint="@color/status_on_time"
+                        app:layout_constraintEnd_toStartOf="@id/networkStatusText"
+                        app:layout_constraintTop_toTopOf="@id/networkStatusText"
+                        app:layout_constraintBottom_toBottomOf="@id/networkStatusText" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:id="@+id/statusDivider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintTop_toBottomOf="@id/statusTitle" />
+
+                    <TextView
+                        android:id="@+id/checkStatusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Check-in Status:"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/statusDivider" />
+
+                    <TextView
+                        android:id="@+id/checkStatusValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Not Checked In"
+                        android:textColor="@color/status_missed"
+                        app:layout_constraintBottom_toBottomOf="@id/checkStatusLabel"
+                        app:layout_constraintStart_toEndOf="@id/checkStatusLabel"
+                        app:layout_constraintTop_toTopOf="@id/checkStatusLabel" />
+
+                    <TextView
+                        android:id="@+id/selectedOfficeLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Selected Office:"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/checkStatusLabel" />
+
+                    <TextView
+                        android:id="@+id/selectedOfficeValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="No office selected"
+                        app:layout_constraintBottom_toBottomOf="@id/selectedOfficeLabel"
+                        app:layout_constraintEnd_toStartOf="@id/changeOfficeButton"
+                        app:layout_constraintStart_toEndOf="@id/selectedOfficeLabel"
+                        app:layout_constraintTop_toTopOf="@id/selectedOfficeLabel" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/changeOfficeButton"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:padding="4dp"
+                        android:text="Change"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="@id/selectedOfficeLabel"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/selectedOfficeLabel" />
+
+                    <TextView
+                        android:id="@+id/locationStatusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Office Location:"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/selectedOfficeLabel" />
+
+                    <TextView
+                        android:id="@+id/geofenceStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Outside office area"
+                        app:layout_constraintBottom_toBottomOf="@id/locationStatusLabel"
+                        app:layout_constraintStart_toEndOf="@id/locationStatusLabel"
+                        app:layout_constraintTop_toTopOf="@id/locationStatusLabel" />
+
+                    <TextView
+                        android:id="@+id/distanceLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Distance from office:"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/locationStatusLabel" />
+
+                    <TextView
+                        android:id="@+id/distanceText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Calculating..."
+                        app:layout_constraintBottom_toBottomOf="@id/distanceLabel"
+                        app:layout_constraintStart_toEndOf="@id/distanceLabel"
+                        app:layout_constraintTop_toTopOf="@id/distanceLabel" />
+
+                    <ImageButton
+                        android:id="@+id/refreshLocationButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Refresh location"
+                        android:minWidth="32dp"
+                        android:minHeight="32dp"
+                        android:src="@drawable/ic_refresh"
+                        app:layout_constraintBottom_toBottomOf="@id/distanceLabel"
+                        app:layout_constraintStart_toEndOf="@id/distanceText"
+                        app:layout_constraintTop_toTopOf="@id/distanceLabel"
+                        app:tint="?attr/colorPrimary" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Check-in Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/checkInButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:enabled="false"
+                android:padding="16dp"
+                android:text="Check In"
+                android:textSize="18sp"
+                app:cornerRadius="12dp"
+                app:layout_constraintTop_toBottomOf="@id/statusCard" />
+
+            <!-- Add loading progress indicator -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:visibility="gone"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/checkInButton"
+                app:layout_constraintTop_toTopOf="@id/checkInButton"
+                app:layout_constraintBottom_toBottomOf="@id/checkInButton"
+                app:layout_constraintEnd_toEndOf="@id/checkInButton" />
+
+            <!-- Stats Summary Cards -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/statsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/checkInButton">
+
+                <TextView
+                    android:id="@+id/statsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This Month"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                    
+                <TextView
+                    android:id="@+id/viewAllStats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View details"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/statsTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/statsTitle" />
+
+                <!-- Stats Grid -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/onTimeCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintEnd_toStartOf="@id/lateCard"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/statsTitle">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                        android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/onTimeCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceHeadline4"
+                            android:textColor="@color/status_on_time"
+                            android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="On Time"
+                            android:textAppearance="?attr/textAppearanceCaption" />
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/lateCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintEnd_toStartOf="@id/missedCard"
+                    app:layout_constraintStart_toEndOf="@id/onTimeCard"
+                    app:layout_constraintTop_toTopOf="@id/onTimeCard">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/lateCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceHeadline4"
+                            android:textColor="@color/status_late"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Late"
+                            android:textAppearance="?attr/textAppearanceCaption" />
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/missedCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/lateCard"
+                    app:layout_constraintTop_toTopOf="@id/onTimeCard">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/missedCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceHeadline4"
+                            android:textColor="@color/status_missed"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Missed"
+                            android:textAppearance="?attr/textAppearanceCaption" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Monthly Summary Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/summaryCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/statsContainer">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monthly Overview"
+                        android:textAppearance="?attr/textAppearanceHeadline6" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/attendancePieChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="12dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Recent Activity -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/recentActivityCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/summaryCard">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        
+                        <TextView
+                            android:id="@+id/recentActivityTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recent Activity"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        
+                        <TextView
+                            android:id="@+id/viewAllHistory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View all"
+                            android:textColor="?attr/colorPrimary"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="@id/recentActivityTitle"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/recentActivityTitle" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/attendanceRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:nestedScrollingEnabled="false" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/surface"
+        app:elevation="8dp"
+        app:itemIconSize="18dp"
+        app:itemIconTint="@color/primary"
+        app:itemTextColor="@color/primary"
+        app:menu="@menu/menu_employee_bottom_nav" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#F5F5F5"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="8dp"
+    app:contentPadding="0dp"
+    app:cardPreventCornerOverlap="true">
+
+    <!-- Colored left border for visual interest -->
+    <View
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/officeRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_marginEnd="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/officeNameText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                tools:text="Main Office" />
+
+            <TextView
+                android:id="@+id/officeAddressText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="#616161"
+                tools:text="123 Business Ave, City, ST" />
+
+            <TextView
+                android:id="@+id/officeDistanceText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                android:drawablePadding="4dp"
+                tools:text="1.2 km away" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView> 

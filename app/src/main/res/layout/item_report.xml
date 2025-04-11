@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- User Name -->
+        <TextView
+            android:id="@+id/userNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            app:layout_constraintEnd_toStartOf="@+id/statusChip"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="John Doe"/>
+
+        <!-- Office Name -->
+        <TextView
+            android:id="@+id/officeNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            app:layout_constraintEnd_toStartOf="@+id/statusChip"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/userNameTextView"
+            tools:text="New York Office"/>
+
+        <!-- Status Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/statusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="On Time"
+            tools:chipBackgroundColor="@color/status_on_time"/>
+
+        <!-- Location Status Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/locationStatusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/statusChip"
+            tools:text="In Office"
+            tools:chipBackgroundColor="@color/location_in_office"
+            tools:chipIcon="@drawable/ic_location_in_office"
+            app:chipIconTint="@android:color/white"
+            android:textColor="@android:color/white"/>
+
+        <!-- Date -->
+        <TextView
+            android:id="@+id/dateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date:"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/officeNameTextView"/>
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:layout_marginStart="4dp"
+            app:layout_constraintStart_toEndOf="@+id/dateLabel"
+            app:layout_constraintTop_toTopOf="@+id/dateLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Mon, Apr 6, 2025"/>
+
+        <!-- Check-in Time -->
+        <TextView
+            android:id="@+id/checkInLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Check-in:"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dateLabel"/>
+
+        <TextView
+            android:id="@+id/checkInTimeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:layout_marginStart="4dp"
+            app:layout_constraintStart_toEndOf="@+id/checkInLabel"
+            app:layout_constraintTop_toTopOf="@+id/checkInLabel"
+            tools:text="09:05 AM"/>
+
+        <!-- Check-out Time -->
+        <TextView
+            android:id="@+id/checkOutLabelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Check-out:"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/checkInLabel"/>
+
+        <TextView
+            android:id="@+id/checkOutTimeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:layout_marginStart="4dp"
+            app:layout_constraintStart_toEndOf="@+id/checkOutLabelTextView"
+            app:layout_constraintTop_toTopOf="@+id/checkOutLabelTextView"
+            tools:text="05:30 PM"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView> 

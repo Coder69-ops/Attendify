@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function hasNotExceededRateLimit() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)/requests).data.count < 100 ||
+             request.time.toMillis() - get(/databases/$(database)/documents/users/$(request.auth.uid)/requests).data.lastReset.toMillis() > 3600000;
+    }
+
+    function isValidEmail(email) {
+      return email.matches('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$');
+    }
+
+    function isValidDate(date) {
+      return date is timestamp || (date is string && date.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+    }
+
+    function isValidAttendanceStatus(status) {
+      return status in ['OnTime', 'Late', 'Missed'];
+    }
+
+    function isValidLocationStatus(status) {
+      return status in ['InOffice', 'OutOfOffice', 'Unknown'];
+    }
+
+    function isValidCheckInTime(time) {
+      return time <= request.time && 
+             time.toMillis() >= request.time.toMillis() - duration.value(24, 'h');
+    }
+
+    function isWithinWorkingHours(time) {
+      return time.toDate().getHours() >= 7 && time.toDate().getHours() <= 19;
+    }
+
+    function hasNoDuplicateCheckIn(userId, date) {
+      return !exists(/databases/$(database)/documents/attendance/$(userId)/$(date));
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isManager() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isManager == true);
+    }
+    
+    match /users/{userId} {
+      allow create: if isAuthenticated() && 
+                   request.auth.uid == userId && 
+                   hasNotExceededRateLimit() &&
+                   isValidEmail(request.resource.data.email) &&
+                   request.resource.data.keys().hasAll(['email', 'fullName', 'role']);
+      
+      allow read: if isUser(userId) || isAdmin() || 
+                    (isManager() && 
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == resource.data.officeId);
+      
+      allow update: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin']) || isAdmin());
+      
+      allow delete: if isAdmin() && hasNotExceededRateLimit();
+    }
+    
+    match /attendance/{userId}/{date}/{docId} {
+      allow read: if (isUser(userId) || isAdmin() || 
+                  (isAuthenticated() && 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.officeId == 
+                   resource.data.officeId)) &&
+                   hasNotExceededRateLimit();
+                   
+      allow create: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   isValidDate(request.resource.data.date) &&
+                   request.resource.data.keys().hasAll(['userId', 'date', 'checkInTime', 'status', 'officeId', 'locationStatus']) &&
+                   isValidAttendanceStatus(request.resource.data.status) &&
+                   isValidLocationStatus(request.resource.data.locationStatus) &&
+                   isValidCheckInTime(request.resource.data.checkInTime) &&
+                   isWithinWorkingHours(request.resource.data.checkInTime) &&
+                   hasNoDuplicateCheckIn(userId, date);
+                   
+      allow update: if (isUser(userId) || isAdmin()) && 
+                   hasNotExceededRateLimit() &&
+                   request.resource.data.diff(resource.data).affectedKeys()
+                     .hasAny(['checkOutTime', 'status', 'notes', 'locationStatus']) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['locationStatus']) || 
+                     isValidLocationStatus(request.resource.data.locationStatus)) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) || 
+                     isValidAttendanceStatus(request.resource.data.status)) &&
+                   (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['checkOutTime']) || 
+                     request.resource.data.checkOutTime > resource.data.checkInTime);
+      
+      allow delete: if isAdmin() && hasNotExceededRateLimit();
+    }
+    
+    match /offices/{officeId} {
+      allow create: if isAdmin();
+      allow read: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /pendingApprovals/{approvalId} {
+      allow read, write: if isAdmin() || isManager();
+    }
+  }
+}
